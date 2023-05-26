@@ -12,6 +12,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("brain2.users.urls", namespace="users")),
+    path("chatbot/", include("brain2.chatbot.urls", namespace="chatbot")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
