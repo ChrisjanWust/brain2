@@ -73,8 +73,8 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "brain2.users",
-    "brain2.chatbot",
     # Your stuff: custom apps go here
+    "brain2.chatbot",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -273,3 +273,4 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+OPENAI_API_KEY = env.str("OPENAI_API_KEY", None)
