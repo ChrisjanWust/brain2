@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from nltk.stem import PorterStemmer
 
-from .models import Context, Session, Account, Keyword
+from .models import Context, Session, Account, Keyword, Question
 from .gpt import chat_with_gpt
 from .words import random_okay_sentence, is_question, is_top_english_word
 
@@ -35,7 +35,9 @@ class ResponseFormulator:
             self.store_context()
             return random_okay_sentence()
         else:
-            return chat_with_gpt(self.get_context(), self.query)
+            context = self.get_context()
+            Question.objects.create(query=self.query, context=context)
+            return chat_with_gpt(context, self.query)
 
     def store_context(self):
         context = Context.objects.create(account_id=self.account_id, text=self.query)

@@ -25,3 +25,8 @@ class Context(ModelBase):
 class Keyword(models.Model):
     word = models.CharField(max_length=16)
     contexts = models.ManyToManyField(Context, related_name="keywords")
+
+
+class Question(ModelBase):
+    query = models.CharField(max_length=200)
+    generated_context = models.TextField()

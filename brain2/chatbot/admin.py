@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Account, Session, Context, Keyword
+from .models import Account, Session, Context, Keyword, Question
 
 
 @admin.register(Account)
@@ -24,3 +24,8 @@ class ContextAdmin(admin.ModelAdmin):
 class KeywordAdmin(admin.ModelAdmin):
     list_display = ("word",)
     filter_horizontal = ("contexts",)
+
+
+@admin.register(Question)
+class KeywordAdmin(admin.ModelAdmin):
+    list_display = ("query",)
