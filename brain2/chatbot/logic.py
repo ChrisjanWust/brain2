@@ -36,7 +36,7 @@ class ResponseFormulator:
             return random_okay_sentence()
         else:
             context = self.get_context()
-            Question.objects.create(query=self.query, context=context)
+            Question.objects.create(query=self.query, generated_context=context)
             return chat_with_gpt(context, self.query)
 
     def store_context(self):
