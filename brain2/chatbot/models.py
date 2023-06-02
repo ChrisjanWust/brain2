@@ -28,5 +28,6 @@ class Keyword(models.Model):
 
 
 class Question(ModelBase):
+    body = models.JSONField()
     query = models.CharField(max_length=200)
     generated_context = models.TextField()
