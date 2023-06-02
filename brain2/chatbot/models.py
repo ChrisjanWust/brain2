@@ -20,3 +20,8 @@ class Session(ModelBase):
 class Context(ModelBase):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     text = models.TextField()
+
+
+class Keyword(models.Model):
+    word = models.CharField(max_length=16)
+    contexts = models.ManyToManyField(Context, related_name="keywords")

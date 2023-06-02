@@ -1,8 +1,12 @@
 from dataclasses import dataclass
-from django.db.models import Q
+from nltk.stem import PorterStemmer
 
-from .models import Context, Session, Account
+from .models import Context, Session, Account, Keyword
 from .gpt import chat_with_gpt
+from .words import random_okay_sentence, is_question, is_top_english_word
+
+
+stemmer = PorterStemmer()
 
 
 @dataclass
@@ -24,26 +28,33 @@ class ResponseFormulator:
         except KeyError:
             self.query = ""
         self.query = self.query.strip()
+        self.keywords = self.extract_keywords(self.query)
 
     def reply(self):
-        if not self.is_question():
-            Context.objects.create(account_id=self.account_id, text=self.query)
-            return "Affirmative."
+        if not is_question(self.query):
+            self.store_context()
+            return random_okay_sentence()
         else:
             return chat_with_gpt(self.get_context(), self.query)
 
-    def is_question(self):
-        # todo: at some point this needs to become much more advanced
-        return self.query.endswith("?")
+    def store_context(self):
+        context = Context.objects.create(account_id=self.account_id, text=self.query)
+        found_keyword_objects = list(Keyword.objects.filter(word__in=self.keywords))
+        found_keywords_words = [keyword.word for keyword in found_keyword_objects]
+        missing_keywords_words = [word for word in self.keywords if word not in found_keywords_words]
+        missing_keyword_objects = Keyword.objects.bulk_create([Keyword(word=word) for word in missing_keywords_words])
+        context.keywords.add(*(found_keyword_objects + missing_keyword_objects))
 
     def get_context(self) -> str:
-        keywords = self.query.split()
-        q = Q()
-        for word in keywords:
-            q |= Q(text__icontains=word)
+        contexts = Context.objects.filter(
+            account_id=self.account_id,
+            keywords__word__in=self.keywords,
+        ).order_by("created")
+        return "Previous conversations:\n" + "\n".join([self.format_context(context) for context in contexts])
 
-        contexts = Context.objects.filter(account_id=self.account_id).filter(q)
-        return "\n".join(contexts.values_list("text", flat=True))
+    @staticmethod
+    def format_context(context: Context):
+        return f'{context.created.weekday()}, {context.created.date()} {context.created.hour}h{context.created.minute}: "{context.text}"'
 
     def gen_account_id(self):
         original_intent = self.body["originalDetectIntentRequest"]
@@ -59,3 +70,10 @@ class ResponseFormulator:
     def extract_channel_id(channel: str, payload: dict):
         if channel == "telegram":
             return payload["data"]["chat"]["id"]
+
+    @staticmethod
+    def extract_keywords(sentence: str) -> list[str]:
+        sentence = sentence.lower()
+        for word in sentence.split(" "):
+            if not is_top_english_word(word):
+                yield stemmer.stem(word)
