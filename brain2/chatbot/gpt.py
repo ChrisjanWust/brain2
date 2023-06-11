@@ -20,5 +20,5 @@ def chat_with_gpt(system_msg: str, user_msg: str):
         ],
     )
     reply: str = response.choices[0].message.content
-    reply.replace(", as an AI language model,", ",", 1)
+    reply = reply.replace(", as an AI language model,", ",", 1)
     return reply

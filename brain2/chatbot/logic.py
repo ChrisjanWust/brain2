@@ -28,7 +28,7 @@ class ResponseFormulator:
         except KeyError:
             self.query = ""
         self.query = self.query.strip()
-        self.keywords = self.extract_keywords(self.query)
+        self.keywords = list(self.extract_keywords(self.query))
 
     def reply(self):
         if not is_question(self.query):
